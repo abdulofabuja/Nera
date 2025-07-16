@@ -33,14 +33,18 @@ router.post('/register', async (req, res) => {
       password: hashedPassword,
       referralCode: generateReferralCode(),
       referredBy: referredBy || null,
-      wallet: 2000, // 🎁 Give ₦2000 bonus at start
-      isBonusLocked: true // 🚫 Lock bonus until first investment
+      wallet: 2000,
+      isBonusLocked: true
     });
 
     await newUser.save();
 
     const token = jwt.sign(
-      { userId: newUser._id, phone: newUser.phone },
+      {
+        userId: newUser._id,
+        phone: newUser.phone,
+        isAdmin: newUser.isAdmin // ✅ include isAdmin in token
+      },
       JWT_SECRET,
       { expiresIn: '7d' }
     );
@@ -51,7 +55,8 @@ router.post('/register', async (req, res) => {
         phone: newUser.phone,
         referralCode: newUser.referralCode,
         wallet: newUser.wallet,
-        isBonusLocked: newUser.isBonusLocked
+        isBonusLocked: newUser.isBonusLocked,
+        isAdmin: newUser.isAdmin // ✅ include in frontend
       }
     });
 
@@ -74,7 +79,11 @@ router.post('/login', async (req, res) => {
     if (!isMatch) return res.status(400).json({ message: 'Invalid credentials' });
 
     const token = jwt.sign(
-      { userId: user._id, phone: user.phone },
+      {
+        userId: user._id,
+        phone: user.phone,
+        isAdmin: user.isAdmin // ✅ include isAdmin in token
+      },
       JWT_SECRET,
       { expiresIn: '7d' }
     );
@@ -85,7 +94,8 @@ router.post('/login', async (req, res) => {
         phone: user.phone,
         referralCode: user.referralCode,
         wallet: user.wallet,
-        isBonusLocked: user.isBonusLocked
+        isBonusLocked: user.isBonusLocked,
+        isAdmin: user.isAdmin // ✅ send to frontend
       }
     });
 
