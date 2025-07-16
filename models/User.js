@@ -11,11 +11,20 @@ const userSchema = new mongoose.Schema({
   referralBalance: { type: Number, default: 0 },
   isAdmin: { type: Boolean, default: false },
 
-  // ✅ NEW: Lock bonus until user activates package
+  // ✅ Lock bonus until user activates package
   isBonusLocked: { type: Boolean, default: true },
   activeInvestment: { type: Number, default: 0 },
   dailyReturn: { type: Number, default: 0 },
-  totalReturns: { type: Number, default: 0 }
+  totalReturns: { type: Number, default: 0 },
+
+  // ✅ NEW: Track referred users and amount earned from them
+  referralEarnings: [
+    {
+      user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+      amount: Number,
+      date: { type: Date, default: Date.now }
+    }
+  ]
 }, { timestamps: true });
 
-module.exports = mongoose.model('User', userSchema);;
+module.exports = mongoose.model('User', userSchema);
