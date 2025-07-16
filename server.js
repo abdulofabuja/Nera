@@ -42,7 +42,7 @@ app.get('/test', (req, res) => {
 
 // 🔁 Default homepage redirect
 app.get('/', (req, res) => {
-  res.redirect('/login.html');
+  res.redirect('/index.html');
 });
 
 // 🧾 Serve all .html files
