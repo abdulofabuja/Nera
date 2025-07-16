@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Withdraw | ₦eraInsight</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    body {
+      background-color: #f0f2f5;
+      font-family: 'Segoe UI', sans-serif;
+    }
+    .card {
+      max-width: 500px;
+      margin: 50px auto;
+      border-radius: 12px;
+      box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
+    }
+    .btn-nera {
+      background-color: #2a5298;
+      color: #fff;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+
+<script>
+  const token = localStorage.getItem('neraToken');
+  const user = JSON.parse(localStorage.getItem('neraUser'));
+
+  if (!token || !user || !user.phone) {
+    alert('❌ Please login first.');
+    window.location.href = 'login.html';
+  }
+</script>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark px-4">
+  <a class="navbar-brand" href="index.html">₦eraInsight</a>
+</nav>
+
+<div class="card p-4 mt-5">
+  <h4 class="text-center mb-3">Withdraw Funds</h4>
+
+  <div class="form-group mb-3">
+    <label for="withdrawAmount">Amount (₦)</label>
+    <input type="number" class="form-control" id="withdrawAmount" placeholder="Enter amount" />
+  </div>
+
+  <div class="form-group mb-3">
+    <label for="withdrawSource">Withdraw From</label>
+    <select class="form-control" id="withdrawSource">
+      <option value="wallet">Investment Wallet</option>
+      <option value="referral">Referral Bonus</option>
+    </select>
+  </div>
+
+  <div class="form-group mb-3">
+    <label for="bankName">Bank Name</label>
+    <input type="text" class="form-control" id="bankName" placeholder="e.g. Access Bank" />
+  </div>
+
+  <div class="form-group mb-3">
+    <label for="accountNumber">Account Number</label>
+    <input type="text" class="form-control" id="accountNumber" placeholder="e.g. 0123456789" />
+  </div>
+
+  <div class="form-group mb-3">
+    <label for="accountName">Account Name</label>
+    <input type="text" class="form-control" id="accountName" placeholder="e.g. John Doe" />
+  </div>
+
+  <button class="btn btn-nera" onclick="withdraw()">Submit Withdrawal</button>
+</div>
+
+<script>
+  async function withdraw() {
+    const amount = document.getElementById('withdrawAmount').value.trim();
+    const source = document.getElementById('withdrawSource').value;
+    const bankName = document.getElementById('bankName').value.trim();
+    const accountNumber = document.getElementById('accountNumber').value.trim();
+    const accountName = document.getElementById('accountName').value.trim();
+
+    if (!amount || !bankName || !accountNumber || !accountName) {
+      return alert('⚠️ All fields are required');
+    }
+
+    try {
+      const res = await fetch('https://nerainsight.onrender.com/api/withdraw/request', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer ' + token
+        },
+        body: JSON.stringify({ amount, source, bankName, accountNumber, accountName })
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        alert('✅ Withdrawal request submitted!');
+        window.location.href = 'dashboard.html';
+      } else {
+        alert(data.message || '❌ Withdrawal failed.');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('⚠️ Network error.');
+    }
+  }
+</script>
+
+</body>
+</html>

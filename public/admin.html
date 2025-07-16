@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Panel | ₦eraInsight</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <style>
+    body {
+      background-color: #f8f9fa;
+      font-family: 'Segoe UI', sans-serif;
+    }
+    .admin-section {
+      margin-top: 40px;
+    }
+    .card {
+      margin-bottom: 20px;
+    }
+    .btn-approve {
+      background: #28a745;
+      color: white;
+    }
+    .btn-decline {
+      background: #dc3545;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <div class="container mt-4">
+    <h2 class="text-center mb-4">👑 ₦eraInsight Admin Panel</h2>
+
+    <div class="admin-section">
+      <h4>📤 Withdrawal Requests</h4>
+      <div id="withdrawals" class="row"></div>
+    </div>
+
+    <div class="admin-section">
+      <h4>👥 All Users & Investments</h4>
+      <div id="users" class="row"></div>
+    </div>
+  </div>
+
+<script>
+  const token = localStorage.getItem('neraToken');
+  const API = 'https://nerainsight.onrender.com/api';
+
+  if (!token) {
+    alert('❌ Admin login required');
+    window.location.href = 'login.html';
+  }
+
+  async function loadWithdrawals() {
+    try {
+      const res = await fetch(`${API}/admin/withdrawals`, {
+        headers: { Authorization: 'Bearer ' + token }
+      });
+      const data = await res.json();
+
+      const container = document.getElementById('withdrawals');
+      container.innerHTML = '';
+
+      data.forEach(w => {
+        container.innerHTML += `
+          <div class="col-md-6">
+            <div class="card p-3">
+              <h6>📱 ${w.phone}</h6>
+              <p>Bank: ${w.bankName} | Acc No: ${w.accountNumber} | Name: ${w.accountName}</p>
+              <p>Amount: ₦${w.amount} | Type: ${w.source}</p>
+              <div class="d-flex gap-2">
+                <button class="btn btn-approve btn-sm" onclick="approve('${w._id}')">Approve</button>
+                <button class="btn btn-decline btn-sm" onclick="decline('${w._id}')">Decline</button>
+              </div>
+            </div>
+          </div>`;
+      });
+    } catch (err) {
+      alert('⚠️ Failed to load withdrawals.');
+    }
+  }
+
+  async function approve(id) {
+    await fetch(`${API}/admin/withdrawals/${id}/approve`, {
+      method: 'POST',
+      headers: { Authorization: 'Bearer ' + token }
+    });
+    loadWithdrawals();
+  }
+
+  async function decline(id) {
+    await fetch(`${API}/admin/withdrawals/${id}/decline`, {
+      method: 'POST',
+      headers: { Authorization: 'Bearer ' + token }
+    });
+    loadWithdrawals();
+  }
+
+  async function loadUsers() {
+    try {
+      const res = await fetch(`${API}/admin/all-users`, {
+        headers: { Authorization: 'Bearer ' + token }
+      });
+      const users = await res.json();
+
+      const container = document.getElementById('users');
+      container.innerHTML = '';
+
+      users.forEach(u => {
+        const totalInvest = u.investments?.length || 0;
+        const totalAmount = u.investments?.reduce((sum, inv) => sum + inv.amount, 0) || 0;
+
+        container.innerHTML += `
+          <div class="col-md-6">
+            <div class="card p-3">
+              <h6>📱 ${u.phone}</h6>
+              <p>Wallet: ₦${u.wallet} | Referral: ₦${u.referralBalance}</p>
+              <p>Investments: ${totalInvest} | Total Invested: ₦${totalAmount}</p>
+            </div>
+          </div>`;
+      });
+    } catch (err) {
+      alert('⚠️ Error loading user list.');
+    }
+  }
+
+  loadWithdrawals();
+  loadUsers();
+</script>
+
+</body>
+</html>
