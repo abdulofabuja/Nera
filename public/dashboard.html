@@ -77,6 +77,15 @@
       </div>
     </div>
 
+    <!-- 💰 Locked Bonus Card -->
+    <div class="col-md-3" id="lockedBonusCard" style="display: none;">
+      <div class="card-box text-center border border-warning">
+        <div class="label text-warning">Locked Bonus</div>
+        <div class="value">₦2,000</div>
+        <small class="text-muted">Activate a package to unlock</small>
+      </div>
+    </div>
+
   </div>
 
   <!-- 📂 Navigation Buttons -->
@@ -95,7 +104,6 @@
 
 <script>
   const API = 'https://nerainsight.onrender.com/api';
-
   document.getElementById('userPhone').textContent = user.phone;
 
   async function fetchDashboard() {
@@ -111,6 +119,11 @@
         document.getElementById('referralAmount').textContent = `₦${data.referral || 0}`;
         document.getElementById('investmentAmount').textContent = `₦${data.activeInvestment || 0}`;
         document.getElementById('dailyReturn').textContent = `₦${data.dailyReturn || 0}`;
+
+        // ✅ Show locked bonus if not yet unlocked
+        if (!data.bonusUnlocked) {
+          document.getElementById('lockedBonusCard').style.display = 'block';
+        }
       } else {
         alert(data.message || 'Error loading dashboard');
       }

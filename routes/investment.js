@@ -24,8 +24,8 @@ router.post('/', auth, async (req, res) => {
 
     let actualWallet = user.wallet;
 
-    // If bonus is locked, exclude ₦2000 from usable balance
-    if (user.isBonusLocked) {
+    // 🚫 Check if bonus is still locked
+    if (!user.bonusUnlocked) {
       if (actualWallet - 2000 < amount) {
         return res.status(400).json({ message: 'Insufficient balance. ₦2000 bonus is locked until first investment.' });
       }
@@ -35,15 +35,15 @@ router.post('/', auth, async (req, res) => {
       }
     }
 
-    // Deduct investment amount
+    // 💸 Deduct investment amount
     user.wallet -= amount;
 
-    // Unlock ₦2000 bonus after first investment
-    if (user.isBonusLocked) {
-      user.isBonusLocked = false;
+    // ✅ Unlock ₦2000 bonus after first investment
+    if (!user.bonusUnlocked) {
+      user.bonusUnlocked = true;
     }
 
-    // Calculate daily return
+    // 📈 Calculate daily return
     let dailyReturn = 0;
     if (amount === 2000) dailyReturn = 429;
     else if (amount === 3000) dailyReturn = 715;
@@ -51,7 +51,7 @@ router.post('/', auth, async (req, res) => {
     else if (amount === 7500) dailyReturn = 1857;
     else return res.status(400).json({ message: 'Invalid package amount' });
 
-    // Save investment
+    // 📝 Save investment
     const newInvestment = new Investment({
       user: user._id,
       amount,
